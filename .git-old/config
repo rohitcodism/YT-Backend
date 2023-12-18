@@ -1,0 +1,16 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/rohitcodism/YT-Backend.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	gh-resolved = base
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[branch "data-modeling-mongoose-hooks-JWT-basics-check"]
+	github-pr-base-branch = "rohitcodism#YT-Backend#main"
+	remote = origin
+	merge = refs/heads/data-modeling-mongoose-hooks-JWT-basics-check
