@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { upload } from "./middlewares/multer.middleware.js";
 
 const app = express();
 
