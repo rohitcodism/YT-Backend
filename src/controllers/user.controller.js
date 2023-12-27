@@ -136,15 +136,15 @@ const registerUser = asyncHandler( async (req, res) => {
     }
     //console.log(req.files);
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const avatarLocalPath = await req.files?.avatar[0]?.path;
     console.log(avatarLocalPath);
     console.log(req.files?.avatar[0]);
 
-    //const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
     let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path
+    if (req.files?.coverImage) {
+        coverImageLocalPath = await req.files?.coverImage[0]?.path;
+        console.log(coverImageLocalPath);
+        console.log(req.files?.coverImage[0]);
     }
     
 
@@ -153,7 +153,11 @@ const registerUser = asyncHandler( async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+    let coverImage;
+    if(coverImageLocalPath){
+        coverImage = await uploadOnCloudinary(coverImageLocalPath)
+    }
 
     console.log(avatar);
 
