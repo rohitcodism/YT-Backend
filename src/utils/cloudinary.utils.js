@@ -7,10 +7,6 @@ cloudinary.config({
     api_secret: 'XanIo5SeI60BQ_DAJEO81tOPceA',
 });
 
-console.log(`Cloudinary config api key : ${cloudinary.config().api_key}`);
-console.log(`Cloudinary config api secret : ${cloudinary.config().api_secret}`);
-console.log(`Cloudinary config cloud name : ${cloudinary.config().cloud_name}`);
-
 const uploadOnCloudinary = async (localFilePath) => {
     console.log(`File Path : ${localFilePath}`);
     try {
@@ -25,6 +21,7 @@ const uploadOnCloudinary = async (localFilePath) => {
         console.log(`File is uploaded on cloudinary.`);
         console.log(`Response : ${res}`);
         console.log(`Response url : ${res.url}`);
+        fs.unlinkSync(localFilePath); // remove the file from our server. As file is already uploaded on cloudinary.
         return res;
     } catch (error) {
         console.log(`Some error happened, while uploading file on cloudinary.`);
