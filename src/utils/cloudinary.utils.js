@@ -32,4 +32,27 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-export { uploadOnCloudinary };
+const deleteFromCloudinary = async (imageUrl) => {
+
+    const publicId = imageUrl.match(/\/v\d+\/(.+)\.\w+$/)[1];
+
+    console.log(`Cloudinary Image Public Id : ${publicId}`);
+
+    try{
+        cloudinary.uploader.destroy(publicId, (error, result) => {
+            if(error){
+                console.log(`Something went wrong while deleting old image.`);
+                console.error(error);
+            }else{
+                console.log(`Image deleted successfully!!!`);
+                console.log(result);
+            }
+        })
+    } catch(error){
+        console.log(`Something went wrong while deleting the old image from cloudinary.`)
+        console.error(error);
+        return null;
+    }
+}
+
+export { uploadOnCloudinary, deleteFromCloudinary };
