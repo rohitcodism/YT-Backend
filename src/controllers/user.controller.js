@@ -345,6 +345,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateAvatar = asyncHandler( async (req, res) => {
+    // TODO : Delete old avatar image from cloudinary.
 
     const avatarLocalPath = req.file?.path;
 
@@ -422,4 +423,83 @@ const updateCoverImage = asyncHandler( async (req, res) => {
     }
 })
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateAvatar, updateCoverImage};
+const getUserChannelProfile = asyncHandler( async (req, res) => {
+    const { username } = req.params
+
+    if(!username?.trim()){
+        throw new apiError(404, "Invalid username!!!")
+    }
+
+    const channel = await User.aggregate(
+        [
+            {
+                $match : {
+                    username: username?.toLowerCase(),
+                }
+            },
+            {
+                $lookup  : {
+                    from : "subscriptions",
+                    localField : "_id",
+                    foreignField : "channel",
+                    as : "subscribers"
+                }
+            },
+            {
+                $lookup : {
+                    from : "subscriptions",
+                    localField : "_id",
+                    foreignField : "subscribers",
+                    as : "subscribedTo"
+                }
+            },
+            {
+                $addFields : {
+                    subscribersCount : {
+                        $size: "$subscribers"
+                    },
+                    channelsSubscribedTo : {
+                        $size: "$subscribedTo"
+                    },
+                    isSubscribed : {
+                        $cond: {
+                            if: {
+                                $in: [req.user?._id, "$subscribers.subscriber"]
+                            },
+                            then: true,
+                            else: false,
+                        }
+                    }
+                }
+            },
+            {
+                $project : {
+                    fullName : 1,
+                    username : 1,
+                    subscribersCount : 1,
+                    channelsSubscribedTo : 1,
+                    isSubscribed : 1,
+                    avatar : 1,
+                    coverImage : 1
+                }
+            }
+        ]
+    );
+
+    if(!channel?.length) {
+        throw new apiError(404, "Channel does not exist!!!");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            channel[0],
+            "Channel fetched successfully."
+        )
+    )
+
+});
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateAvatar, updateCoverImage, getUserChannelProfile};
