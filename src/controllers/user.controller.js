@@ -309,16 +309,20 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, incomingPassword } = req.body;
 
-    if(!fullName || !email){
+    if(!fullName && !email){
         throw new apiError(400, "All fields cannot be blanked!!!");
     }
 
-    if(incomingPassword !== req.user?.password){
+    const user = await User.findById(req.user?._id);
+
+    const isPasswordCorrect = await user.isPasswordCorrect(incomingPassword);
+
+    if(!isPasswordCorrect){
         throw new apiError(400, "Invalid password !!!, cannot change the account details.")
     }
 
     try {
-        const user = User.findOneAndUpdate(
+        const user = await User.findOneAndUpdate(
             req.user?._id,
             {
                 $set : {
@@ -341,6 +345,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
             )
         )
     } catch (error) {
+        console.error(error);
         throw new apiError(400, "Unauthorized request!!!")
     }
 });
