@@ -411,8 +411,6 @@ const updateCoverImage = asyncHandler( async (req, res) => {
             await deleteFromCloudinary(oldCoverImage);
         }
 
-        console.log(newCoverImage);
-
         const user = await User.findByIdAndUpdate(
             req.user?._id,
             {
