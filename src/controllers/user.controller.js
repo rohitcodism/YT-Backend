@@ -351,7 +351,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateAvatar = asyncHandler( async (req, res) => {
-    // TODO : Delete old avatar image from cloudinary.
 
     const avatarLocalPath = req.file?.path;
 
