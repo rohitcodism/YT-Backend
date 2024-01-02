@@ -401,7 +401,7 @@ const updateCoverImage = asyncHandler( async (req, res) => {
     }
 
     try {
-        const newCoverImage = uploadOnCloudinary(coverImageLocalPath);
+        const newCoverImage = await uploadOnCloudinary(coverImageLocalPath);
 
         if(!newCoverImage){
             throw new apiError(400, "Can't upload cover image.");
@@ -410,6 +410,8 @@ const updateCoverImage = asyncHandler( async (req, res) => {
         if(oldCoverImage){
             await deleteFromCloudinary(oldCoverImage);
         }
+
+        console.log(newCoverImage);
 
         const user = await User.findByIdAndUpdate(
             req.user?._id,

@@ -36,10 +36,12 @@ const deleteFromCloudinary = async (imageUrl) => {
 
     const publicId = imageUrl.match(/\/v\d+\/(.+)\.\w+$/)[1];
 
+    console.log(`Image url : ${imageUrl}`)
+
     console.log(`Cloudinary Image Public Id : ${publicId}`);
 
     try{
-        cloudinary.uploader.destroy(publicId, (error, result) => {
+        await cloudinary.uploader.destroy(publicId, (error, result) => {
             if(error){
                 console.log(`Something went wrong while deleting old image.`);
                 console.error(error);
