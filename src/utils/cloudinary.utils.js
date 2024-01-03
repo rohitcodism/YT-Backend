@@ -57,4 +57,27 @@ const deleteFromCloudinary = async (imageUrl) => {
     }
 }
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+const videoUploadOnCloudinary = async (videoLocalPath) => {
+    console.log(`Video File Path : ${videoLocalPath}`);
+
+    try {
+        if(!videoLocalPath){
+            console.log(`Video file path inside check block : ${videoLocalPath}`);
+            return null;
+        }
+        const res = await cloudinary.uploader.upload(videoLocalPath, {
+            resource_type: "video",
+        });
+        console.log(`Video uploaded on cloudinary.`);
+        console.log(`Response : ${res}`);
+        console.log(`Response url  : ${res.url}`);
+        fs.unlinkSync(videoLocalPath) // removing the video file from the local server;
+        return res;
+    } catch (error) {
+        console.log(`Something went wrong while uploading the video on cloudinary!!!`, error);
+        fs.unlinkSync(videoLocalPath);
+        return null;
+    }
+}
+
+export { uploadOnCloudinary, deleteFromCloudinary, videoUploadOnCloudinary };
