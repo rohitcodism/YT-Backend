@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import path from "path";
 import { uploadOnCloudinary, videoUploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { Video } from "../models/video.models.js";
-import { apiResponse } from "../utils/apiResponse";
+import { apiResponse } from "../utils/apiResponse.js";
 
 
 const uploadVideo = asyncHandler( async (req, res) => {
@@ -16,7 +16,7 @@ const uploadVideo = asyncHandler( async (req, res) => {
     const videoFileLocalPath = req.files?.videoFile[0].path;
     const thumbnailLocalPath = req.files?.thumbnail[0].path;
 
-    console.log(`Files uploaded by user : ${req.files}`);
+    // console.log(`Files uploaded by user : ${req.files}`);
 
     if(!videoFileLocalPath){
         throw new apiError(400, "Video file is required!!!");

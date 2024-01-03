@@ -34,7 +34,7 @@ const videoSchema = new mongoose.Schema(
         duration:
         {
             type: Number, // will fetch this from Cloudinary
-            required: [true, "Video duration is required."]
+            // required: [true, "Video duration is required."]
         },
         views:
         {
