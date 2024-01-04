@@ -85,7 +85,7 @@ const deleteVideo = asyncHandler( async(req, res) => {
         throw new apiError(400, "These fields cannot be blank.");
     }
 
-    const videoToBeDeleted = await Video.findOne(title);
+    const videoToBeDeleted = await Video.findOne({title});
 
     if(!videoToBeDeleted){
         throw new apiError(400, "Invalid Video!!!");
