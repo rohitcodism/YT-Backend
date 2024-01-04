@@ -143,4 +143,51 @@ const deleteVideo = asyncHandler( async(req, res) => {
 
 })
 
-export {uploadVideo, deleteVideo};
+const editVideoFile = asyncHandler( async(req, res) => {
+    const { incomingPassword, oldVideoTitle } = req.body;
+
+    if(!incomingPassword || !oldVideoTitle){
+        throw new apiError(400, "These fields cannot be blank.");
+    }
+
+    const newVideoFileLocalPath = req.file?.path;
+
+    if(!newVideoFileLocalPath){
+        throw new apiError(400, "New video file path is required!!!");
+    }
+
+    const newVideoFile = await videoUploadOnCloudinary(newVideoFileLocalPath);
+
+    if(!newVideoFile){
+        throw new apiError(500, "Something went wrong while uploading the video file on cloudinary.");
+    }
+
+    const newVideo = await Video.findOneAndUpdate(
+        {oldVideoTitle},
+        {
+            $set : {
+                videoFile : newVideoFile.url,
+            }
+        },
+        {
+            new : true,
+        }
+    );
+
+    if(!newVideo){
+        throw new apiError(500, "Something went wrong Cannot upload the video!!!");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            newVideo,
+            "Video file changed successfully."
+        )
+    )
+
+})
+
+export {uploadVideo, deleteVideo, editVideoFile};
