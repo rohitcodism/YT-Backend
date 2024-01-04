@@ -1,8 +1,8 @@
 import { apiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import path from "path";
-import { uploadOnCloudinary, videoUploadOnCloudinary } from "../utils/cloudinary.utils.js";
+import { deleteFromCloudinary, uploadOnCloudinary, videoUploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { Video } from "../models/video.models.js";
+import { User } from "../models/user.models.js"
 import { apiResponse } from "../utils/apiResponse.js";
 
 
@@ -78,5 +78,69 @@ const uploadVideo = asyncHandler( async (req, res) => {
 
 });
 
+const deleteVideo = asyncHandler( async(req, res) => {
+    const {title, incomingPassword} = req.body;
 
-export {uploadVideo};
+    if(!title || !incomingPassword){
+        throw new apiError(400, "These fields cannot be blank.");
+    }
+
+    const videoToBeDeleted = await Video.findOne(title);
+
+    if(!videoToBeDeleted){
+        throw new apiError(400, "Invalid Video!!!");
+    }
+
+    const videoOwner = await User.findById(req.user?._id);
+
+    if(!videoOwner){
+        throw new apiError(400, "Owner not found!!!")
+    }
+
+    const isValidPassword = videoOwner.isPasswordCorrect(incomingPassword);
+
+    if(!isValidPassword){
+        throw new apiError(400, "Invalid password!!!");
+    }
+
+    try {
+        const res = await deleteFromCloudinary(videoToBeDeleted?.videoFile);
+        console.log(res);
+        console.log("Video file successfully deleted from cloudinary.")
+    } catch (error) {
+        console.error(error);
+        throw new apiError(400, "Something went wrong while deleting the video file!!!");
+    }
+
+    try {
+        const res = await deleteFromCloudinary(videoToBeDeleted?.thumbnail);
+        console.log(res);
+        console.log("Thumbnail successfully deleted from cloudinary.")
+    } catch (error) {
+        console.error(error);
+        throw new apiError(400, "Something went wrong while deleting the thumbnail from cloudinary!!!");
+    }
+
+    let deletedVideo;
+    try {
+        deletedVideo = await Video.findByIdAndDelete(videoToBeDeleted?._id);
+        console.log("Deleted video : ", deletedVideo)
+        console.log("Video successfully deleted from database.")
+    } catch (error) {
+        console.error(error);
+        console.log("Something went wrong while deleting the video from the database!!!");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            deletedVideo,
+            "Video successfully deleted."
+        )
+    )
+
+})
+
+export {uploadVideo, deleteVideo};

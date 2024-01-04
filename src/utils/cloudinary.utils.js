@@ -36,7 +36,7 @@ const deleteFromCloudinary = async (imageUrl) => {
 
     const publicId = imageUrl.match(/\/v\d+\/(.+)\.\w+$/)[1];
 
-    console.log(`Image url : ${imageUrl}`)
+    console.log(`Content url : ${imageUrl}`)
 
     console.log(`Cloudinary Image Public Id : ${publicId}`);
 
