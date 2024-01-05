@@ -24,6 +24,6 @@ router.route("/upload-video").post(
 
 router.route("/delete-video").delete(verifyJWT,deleteVideo)
 
-router.route("/edit-video-file").patch(verifyJWT, editVideoFile);
+router.route("/edit-video-file").patch(verifyJWT, upload.single("newVideoFile"), editVideoFile);
 
 export default router;

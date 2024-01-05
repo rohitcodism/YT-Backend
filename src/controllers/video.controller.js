@@ -13,10 +13,12 @@ const uploadVideo = asyncHandler( async (req, res) => {
         throw new apiError(400, "All the fields are required!!!");
     }
 
-    const videoFileLocalPath = req.files?.videoFile[0].path;
-    const thumbnailLocalPath = req.files?.thumbnail[0].path;
+    console.log(`Files uploaded by user : `, req.files);
 
-    // console.log(`Files uploaded by user : ${req.files}`);
+    const videoFileLocalPath = req.files?.videoFile[0]?.path;
+    const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
+
+    
 
     if(!videoFileLocalPath){
         throw new apiError(400, "Video file is required!!!");
@@ -146,6 +148,12 @@ const deleteVideo = asyncHandler( async(req, res) => {
 const editVideoFile = asyncHandler( async(req, res) => {
     const { incomingPassword, oldVideoTitle } = req.body;
 
+    console.log("Request body : ", req.body);
+
+    console.log("Incoming password : ", incomingPassword);
+
+    console.log("Old video title : ", oldVideoTitle);
+
     if(!incomingPassword || !oldVideoTitle){
         throw new apiError(400, "These fields cannot be blank.");
     }
@@ -163,7 +171,7 @@ const editVideoFile = asyncHandler( async(req, res) => {
     }
 
     const newVideo = await Video.findOneAndUpdate(
-        {oldVideoTitle},
+        {title : oldVideoTitle},
         {
             $set : {
                 videoFile : newVideoFile.url,
