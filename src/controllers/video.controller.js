@@ -143,7 +143,7 @@ const deleteVideo = asyncHandler( async(req, res) => {
         )
     )
 
-})
+});
 
 const editVideoFile = asyncHandler( async(req, res) => {
     const { incomingPassword, oldVideoTitle } = req.body;
@@ -204,6 +204,60 @@ const editVideoFile = asyncHandler( async(req, res) => {
         )
     )
 
+});
+
+const editThumbnail = asyncHandler(async(req,res) => {
+    const {incomingPassword, videoTitle} = req.body;
+
+    if(!incomingPassword || !videoTitle){
+        throw new apiError(400, "These fields cannot be blanked!!!");
+    }
+
+    const video = await Video.findOne({title: videoTitle});
+
+    if(!video){
+        throw new apiError(400, "Wrong video title!!!");
+    }
+
+    const newThumbnailLocalPath = req.file?.path;
+
+    if(!newThumbnailLocalPath){
+        throw new apiError(400, "A new thumbnail is needed to update the video thumbnail!!!");
+    }
+
+    const newThumbnail = await uploadOnCloudinary(newThumbnailLocalPath);
+
+    if(!newThumbnail){
+        throw new apiError(500, "Cannot upload new thumbnail on cloudinary!!!");
+    }
+
+    const updatedThumbnailVideo = await Video.findOneAndUpdate(
+        {title : videoTitle},
+        {
+            $set : {
+                thumbnail : newThumbnail.url,
+            }
+        },
+        {
+            new : true,
+        }
+    )
+
+    if(!updatedThumbnailVideo){
+        throw new apiError(500, "Cannot update the thumbnail!!!");
+    }
+
+    await deleteFromCloudinary(video?.thumbnail);
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            updatedThumbnailVideo,
+            "Successfully updated the thumbnail.",
+        )
+    )
 })
 
-export {uploadVideo, deleteVideo, editVideoFile};
+export {uploadVideo, deleteVideo, editVideoFile, editThumbnail};

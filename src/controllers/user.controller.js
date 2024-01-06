@@ -366,8 +366,6 @@ const updateAvatar = asyncHandler( async (req, res) => {
         throw new apiError(400, "Something went wrong while uploading avatar file!!!");
     }
 
-    await deleteFromCloudinary(oldAvatarUrl);
-
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
@@ -379,6 +377,12 @@ const updateAvatar = asyncHandler( async (req, res) => {
             new : true,
         }
     ).select("-password")
+
+    if(!user){
+        throw new apiError(400, "Cannot update the avatar!!!");
+    }
+
+    await deleteFromCloudinary(oldAvatarUrl);
 
     res
     .status(200)
