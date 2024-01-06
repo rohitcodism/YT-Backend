@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs";
+import { apiError } from './apiError';
 
 cloudinary.config({
     cloud_name: 'dhiytc6vf',
@@ -45,6 +46,7 @@ const deleteFromCloudinary = async (imageUrl) => {
             if(error){
                 console.log(`Something went wrong while deleting old image.`);
                 console.error(error);
+                throw new apiError(500, "Cannot delete old video from cloudinary!!!");
             }else{
                 console.log(`Image deleted successfully!!!`);
                 console.log(result);

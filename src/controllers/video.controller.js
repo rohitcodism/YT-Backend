@@ -170,6 +170,14 @@ const editVideoFile = asyncHandler( async(req, res) => {
         throw new apiError(500, "Something went wrong while uploading the video file on cloudinary.");
     }
 
+    const oldVideo = await Video.findOne({oldVideoTitle});
+
+    if(!oldVideo){
+        throw new apiError(400, "Wrong video title!!!");
+    }
+
+    await deleteFromCloudinary(oldVideo?.videoFile);
+
     const newVideo = await Video.findOneAndUpdate(
         {title : oldVideoTitle},
         {
