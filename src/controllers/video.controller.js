@@ -332,7 +332,56 @@ const updateVideoDetails = asyncHandler(async(req, res) => {
 
 });
 
+const togglePublishStatus = asyncHandler(async(req,res) => {
+    const {videoId} = req.params;
+    const {incomingPassword} = req.body;
 
+    if(!videoId){
+        throw new apiError(400, "Did not get the video id!!!");
+    }
+
+    if(!incomingPassword){
+        throw new apiError(400, "Did not get the password!!!");
+    }
+
+    const user = await User.findById(req.user?._id);
+
+    if(!user){
+        throw new apiError(400, "Unauthorized request!!!");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(incomingPassword);
+
+    if(!isPasswordValid){
+        throw new apiError(400, "Invalid Password!!!");
+    }
+
+    const video = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set : {
+                isPublished : false,
+            }
+        },
+        {
+            new : true,
+        }
+    )
+
+    if(!video){
+        throw new apiError(400, "Something went wrong while toggling publish status!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            video,
+            "Publish status toggled successfully!!!"
+        )
+    )
+})
 
 export {
     uploadVideo,
@@ -340,5 +389,6 @@ export {
     editVideoFile,
     editThumbnail, 
     updateVideoDetails, 
-    getVideoById
+    getVideoById,
+    togglePublishStatus
 };
