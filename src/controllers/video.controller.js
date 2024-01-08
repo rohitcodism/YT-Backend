@@ -4,6 +4,7 @@ import { deleteFromCloudinary, uploadOnCloudinary, videoUploadOnCloudinary } fro
 import { Video } from "../models/video.models.js";
 import { User } from "../models/user.models.js"
 import { apiResponse } from "../utils/apiResponse.js";
+import mongoose from "mongoose";
 
 
 const uploadVideo = asyncHandler( async (req, res) => {
@@ -258,6 +259,77 @@ const editThumbnail = asyncHandler(async(req,res) => {
             "Successfully updated the thumbnail.",
         )
     )
-})
+});
 
-export {uploadVideo, deleteVideo, editVideoFile, editThumbnail};
+const getVideoById = asyncHandler(async(req,res) => {
+    const {videoId} = req.params;
+
+    console.log(req.params);
+
+    if(!videoId){
+        throw new apiError(400, "Did not get the video id!!!");
+    }
+
+    const video = await Video.findById(videoId);
+
+    if(!video){
+        throw new apiError(404, "Video not found!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            video,
+            "Fetched video successfully."
+        )
+    )
+});
+
+const updateVideoDetails = asyncHandler(async(req, res) => {
+    const { videoId } = req.params;
+    const {newTitle, newDescription} = req.body;
+
+    if(!videoId){
+        throw new apiError(400, "Invalid video id!!!");
+    }
+
+    if([newTitle, newDescription].some((field) => field.trim() === "")){
+        throw new apiError(400, "These fields cannot be blank!!!")
+    }
+
+    const video = await Video.findByIdAndUpdate(
+        mongoose.Types.ObjectId(videoId),
+        {
+            $set : {
+                title : newTitle,
+                description : newDescription,
+            }
+        }
+    );
+
+    if(!video){
+        throw new apiError(400, "Something went wrong while updating the video details!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            video,
+            "Successfully updated video details."
+        )
+    )
+
+});
+
+export {
+    uploadVideo,
+    deleteVideo,
+    editVideoFile,
+    editThumbnail, 
+    updateVideoDetails, 
+    getVideoById
+};
