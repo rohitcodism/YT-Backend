@@ -291,21 +291,28 @@ const updateVideoDetails = asyncHandler(async(req, res) => {
     const { videoId } = req.params;
     const {newTitle, newDescription} = req.body;
 
+    console.log(req.body);
+    console.log(newTitle);
+    console.log(newDescription);
+
     if(!videoId){
         throw new apiError(400, "Invalid video id!!!");
     }
 
-    if([newTitle, newDescription].some((field) => field.trim() === "")){
+    if([newTitle, newDescription].some((field) => field?.trim() === "")){
         throw new apiError(400, "These fields cannot be blank!!!")
     }
 
     const video = await Video.findByIdAndUpdate(
-        mongoose.Types.ObjectId(videoId),
+        videoId,
         {
             $set : {
                 title : newTitle,
                 description : newDescription,
             }
+        },
+        {
+            new : true,
         }
     );
 
@@ -324,6 +331,8 @@ const updateVideoDetails = asyncHandler(async(req, res) => {
     )
 
 });
+
+
 
 export {
     uploadVideo,

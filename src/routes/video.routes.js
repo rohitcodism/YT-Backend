@@ -30,6 +30,6 @@ router.route("/update-thumbnail").patch(verifyJWT,upload.single("newThumbnail"),
 
 router.route("/get-video/:videoId").get(verifyJWT,getVideoById);
 
-router.route("/update-video-details").patch(verifyJWT,updateVideoDetails);
+router.route("/update-video-details/:videoId").patch(verifyJWT,updateVideoDetails);
 
 export default router;
