@@ -32,9 +32,6 @@ const getPaginatedData = async(page, limit, owner) => {
 
 
 }
-
-
-// ToDo : Write the getAllVideos controller function
 const getAllVideos = asyncHandler(async(req,res) => {
     const { page=1, limit=10, query, sortBy, sortType, userId } = req.query;
 
