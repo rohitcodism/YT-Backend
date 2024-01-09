@@ -4,8 +4,69 @@ import { deleteFromCloudinary, uploadOnCloudinary, videoUploadOnCloudinary } fro
 import { Video } from "../models/video.models.js";
 import { User } from "../models/user.models.js"
 import { apiResponse } from "../utils/apiResponse.js";
-import mongoose from "mongoose";
+import mongoose, { get } from "mongoose";
 
+const getPaginatedData = async(page, limit, owner) => {
+    try {
+        const skip = (page-1)*limit // to count the number of documents to skip.
+        const totalCount = await Video.countDocuments() // to count the total number of documents.
+    
+        const videos = await Video.find({owner : owner})
+            .skip(skip)
+            .limit(limit)
+    
+        if(!videos){
+            throw new apiError(500, "Cannot fetch videos from database!!!");
+        }
+
+        return{
+            total : totalCount,
+            page,
+            limit,
+            videos
+        }
+    } catch (error) {
+        console.log("Something went wrong while fetching the paginated video data from the database!!!");
+        console.error(error);
+    }
+
+
+}
+
+
+// ToDo : Write the getAllVideos controller function
+const getAllVideos = asyncHandler(async(req,res) => {
+    const { page=1, limit=10, query, sortBy, sortType, userId } = req.query;
+
+    if(!sortBy || !sortType || !userId || !query){
+        throw new apiError(400, "These fields cannot be blank!!!");
+    }
+
+    const uploaderChannel = await User.findById(userId);
+
+    if(!uploaderChannel){
+        throw new apiError(400, "Channel not found.");
+    }
+
+    try {
+        const result = await getPaginatedData(page, limit, userId);
+        console.log("Result from the pagination function : \n",result);
+        res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                result,
+                "Videos fetched successfully."
+            )
+        )
+    } catch (error) {
+        console.log("Something went wrong in the pagination function!!!");
+        console.error("Error : ",error);
+    }
+
+
+});
 
 const uploadVideo = asyncHandler( async (req, res) => {
     const { title, description } = req.body;
@@ -390,5 +451,6 @@ export {
     editThumbnail, 
     updateVideoDetails, 
     getVideoById,
-    togglePublishStatus
+    togglePublishStatus,
+    getAllVideos
 };
