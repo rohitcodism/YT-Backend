@@ -59,6 +59,44 @@ const createPlaylist = asyncHandler(async (req, res) => {
         )
 });
 
+const updatePlaylistDetails = asyncHandler(async(req,res) => {
+    const {newTitle, newDescription} = req.body;
+    const {playlistId} = req.params;
+
+    if(!newTitle || !newDescription){
+        throw new apiError(400, "Did not get new playlist title or description!!!");
+    }
+
+    if(!playlistId){
+        throw new apiError(400, "Did not get the playlist id!!!");
+    }
+
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        {
+            name : newTitle,
+            description : newDescription,
+        },
+        {
+            new : true,
+        }
+    );
+
+    if(!updatedPlaylist){
+        throw new apiError(500, "Cannot change the title or description of the playlist!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            updatedPlaylist,
+            "Changed playlist title and description successfully."
+        )
+    )
+});
+
 const deletePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
     const { incomingPassword } = req.body;
@@ -240,5 +278,6 @@ export {
     getUserPlaylist,
     getPlaylistById,
     addVideos,
-    removeVideos
+    removeVideos,
+    updatePlaylistDetails
 }
