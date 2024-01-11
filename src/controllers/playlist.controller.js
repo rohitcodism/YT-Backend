@@ -44,7 +44,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
         }
     )
 
-    if(!newPlayList){
+    if (!newPlayList) {
         throw new apiError(500, "Something went wrong while creating a new playlist");
     }
 
@@ -59,23 +59,23 @@ const createPlaylist = asyncHandler(async (req, res) => {
         )
 });
 
-const deletePlaylist = asyncHandler(async(req,res) => {
-    const {playlistId} = req.params;
-    const {incomingPassword} = req.body;
+const deletePlaylist = asyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+    const { incomingPassword } = req.body;
 
-    if(!playlistId || !incomingPassword){
+    if (!playlistId || !incomingPassword) {
         throw new apiError("Did not got the playlist id!!!");
     }
 
     const user = await User.findById(req.user?._id);
 
-    if(!user){
+    if (!user) {
         throw new apiError(400, "Unauthorized request!!!");
     }
 
     const isValidPassword = user.isPasswordCorrect(incomingPassword);
 
-    if(!isValidPassword){
+    if (!isValidPassword) {
         throw new apiError(400, "Invalid password!!!");
     }
 
@@ -88,45 +88,102 @@ const deletePlaylist = asyncHandler(async(req,res) => {
     }
 
     res
-    .status(200)
-    .json(
-        new apiResponse(
-            200,
-            null,
-            "Playlist deleted successfully."
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                null,
+                "Playlist deleted successfully."
+            )
         )
-    )
 });
 
-const getUserPlaylist = asyncHandler(async(req,res) => {
-    const playlist = await Playlist.findOne({owner : req.user?._id});
+const getUserPlaylist = asyncHandler(async (req, res) => {
+    const playlist = await Playlist.findOne({ owner: req.user?._id });
 
-    if(!playlist){
+    if (!playlist) {
         throw new apiError(404, "Playlist not found!!!");
     }
 
     res
-    .status(200)
-    .json(
-        new apiResponse(
-            200,
-            playlist,
-            "Playlist fetched successfully."
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                playlist,
+                "Playlist fetched successfully."
+            )
         )
-    )
 });
 
-const getPlaylistById = asyncHandler(async(req,res) => {
-    const {playlistId} = req.params;
+const getPlaylistById = asyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
 
-    if(!playlistId){
+    if (!playlistId) {
         throw new apiError(400, "Did not get the playlist id!!!");
     }
 
     const playlist = await Playlist.findById(playlistId);
 
-    if(!playlist){
+    if (!playlist) {
         throw new apiError(400, "Cannot fetch playlist from database!!!");
+    }
+
+    res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                playlist,
+                "Playlist fetched successfully!!!",
+            )
+        )
+});
+
+const addVideos = asyncHandler(async (req, res) => {
+    const { videoTitles } = req.body;
+    const { playlistId } = req.params;
+
+    if (!videoTitles || !playlistId) {
+        throw new apiError(400, "These fields cannot be blank!!!");
+    }
+
+    const playlist = await Playlist.findById(playlistId)
+
+    if (!playlist) {
+        throw new apiError(400, "Playlist not found!!!");
+    }
+
+    const videosToAdd = Promise.all(
+        videoTitles.map(async (videoTitle) => {
+            const videoToAdd = await Video.findOne({ title: videoTitle });
+
+            if (!videoToAdd) {
+                throw new apiError(404, "Cannot find the video!!!");
+            }
+
+            return videoToAdd;
+        })
+    );
+
+    if (videosToAdd.length === 0) {
+        throw new apiError(500, "Cannot get the videos to add!!!");
+    }
+
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        {
+            $push: {
+                videos: videosToAdd,
+            }
+        },
+        {
+            new: true,
+        }
+    )
+
+    if(!updatedPlaylist){
+        throw new apiError(500, "Cannot add videos to the playlist");
     }
 
     res
@@ -134,15 +191,16 @@ const getPlaylistById = asyncHandler(async(req,res) => {
     .json(
         new apiResponse(
             200,
-            playlist,
-            "Playlist fetched successfully!!!",
+            updatedPlaylist,
+            "Added videos to the playlist successfully."
         )
     )
-})
+});
 
 export {
     createPlaylist,
     deletePlaylist,
     getUserPlaylist,
-    getPlaylistById
+    getPlaylistById,
+    addVideos
 }
