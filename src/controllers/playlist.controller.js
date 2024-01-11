@@ -99,7 +99,10 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 });
 
 const getUserPlaylist = asyncHandler(async (req, res) => {
-    const playlist = await Playlist.findOne({ owner: req.user?._id });
+    console.log(req.user?._id);
+    const playlist = await Playlist.findOne({ owner: req.user?._id }); // ** We can get this userId from request params too.
+
+    console.log(playlist);
 
     if (!playlist) {
         throw new apiError(404, "Playlist not found!!!");
@@ -154,7 +157,7 @@ const addVideos = asyncHandler(async (req, res) => {
         throw new apiError(400, "Playlist not found!!!");
     }
 
-    const videosToAdd = Promise.all(
+    const videosToAdd = await Promise.all(
         videoTitles.map(async (videoTitle) => {
             const videoToAdd = await Video.findOne({ title: videoTitle });
 
