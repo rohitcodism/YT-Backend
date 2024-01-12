@@ -2,7 +2,6 @@ import { Router } from "express";
 import { addVideos, createPlaylist, deletePlaylist, getPlaylistById, getUserPlaylist, removeVideos, updatePlaylistDetails } from "../controllers/playlist.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
-
 const router = Router();
 
 router.route("/create-playlist").post(verifyJWT,createPlaylist);
