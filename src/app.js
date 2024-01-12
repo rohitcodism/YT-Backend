@@ -24,7 +24,8 @@ app.use(cookieParser());
 //routes import
 import userRouter from "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
-import playlistRouter from "./routes/playlist.routes.js"
+import playlistRouter from "./routes/playlist.routes.js";
+import tweetsRouter from "./routes/tweet.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter); // --> https://localhost:3000/api/v1/users/register
@@ -32,5 +33,7 @@ app.use("/api/v1/users", userRouter); // --> https://localhost:3000/api/v1/users
 app.use("/api/v1/videos", videoRouter); // --> https://localhost:3000/api/v1/videos
 
 app.use("/api/v1/playlist", playlistRouter) // --> https://localhost:3000/api/v1/playlist
+
+app.use("/api/v1/tweets", tweetsRouter) // --> https://localhost:3000/api/v1/tweets
 
 export { app };

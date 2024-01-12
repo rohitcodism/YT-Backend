@@ -6,9 +6,11 @@ const tweetSchema = new mongoose.Schema(
             type : String,
             required : true,
         },
-        mediaFile : {
-            type : String,
-        },
+        mediaFile : [
+            {
+                type : String,
+            }
+        ],
         owner : {
             type : mongoose.Schema.Types.ObjectId,
             required : true,

@@ -1,28 +1,46 @@
 import { Tweet } from "../models/tweet.models.js";
-import { apiError, apiResponse } from "../utils/apiError.js";
+import { apiError } from "../utils/apiError.js";
+import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 
 
 
-const createTweet = async(asyncHandler(async(req,res) => {
+const createTweet = asyncHandler(async(req,res) => {
     const {message} = req.body;
 
-    const mediaLocalPath = req.files?.media[0].path;
+    console.log(req.files);
+
+    let mediaFileLocalPath;
+    if(req.files){
+        mediaFileLocalPath = req.files.map((file) => {
+            return file.path;
+        })
+    }
+
+    console.log("Media file local path : ",mediaFileLocalPath);
 
     if(!message){
         throw new apiError(400, "Did not get the caption!!!");
     }
 
-    let mediaFile;
-    if(mediaLocalPath){
-        mediaFile = await uploadOnCloudinary(mediaLocalPath)
+    let mediaFiles;
+    if(mediaFileLocalPath.length > 0){
+        mediaFiles = await Promise.all(
+            mediaFileLocalPath?.map(async(filePath) => {
+                const uploadedFile = await uploadOnCloudinary(filePath)
+
+                return uploadedFile.url;
+            })
+        )
     }
+
+    console.log("Uploaded files on Cloudinary : ",mediaFiles);
 
     const tweet = await Tweet.create(
         {
             content : message,
-            mediaFile : mediaFile,
+            mediaFile : mediaFiles || [],
             owner : req.user?._id
         }
     )
@@ -41,7 +59,7 @@ const createTweet = async(asyncHandler(async(req,res) => {
         )
     )
 
-}));
+});
 
 export {
     createTweet,
