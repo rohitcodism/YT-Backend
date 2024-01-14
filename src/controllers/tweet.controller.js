@@ -99,23 +99,17 @@ const updateTweet = asyncHandler(async(req,res) => {
         throw new apiError("Cannot upload new media files on cloudinary!!!");
     }
 
-    const updateOperations = {}
-
-    if(newFiles?.length > 0){
-        updateOperations.$push = {
-            mediaFile : newFiles,
-        }
-    }
-
-    // if(filesToDelete){
-    //     updateOperations.$pull = {
-    //         mediaFile : filesToDelete,
-    //     }
-    // }
 
     const updatedTweet = await Tweet.findByIdAndUpdate(
         tweetId,
-        updateOperations,
+        {
+            $push : {
+                mediaFile : newFiles,
+            },
+            $set : {
+                content : newMessage
+            }
+        },
         {
             new : true,
         }
@@ -124,6 +118,8 @@ const updateTweet = asyncHandler(async(req,res) => {
     if(!updatedTweet){
         throw new apiError(500, "Cannot update the tweet!!!");
     }
+
+    //TODO : Have plans to edit the existing media files in the tweet, use can remove existing media files in the tweet.
 
     // if(filesToDelete.length > 0){
     //     filesToDelete.map(async(fileToDelete) => {
