@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Tweet } from "../models/tweet.models.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
@@ -171,8 +172,49 @@ const deleteTweet = asyncHandler(async(req,res) =>{
     )
 });
 
+const getUserTweets = asyncHandler(async(req,res) => {
+    const {userId} = req.params;
+
+    if(!userId){
+        throw new apiError(400, "Expected a user id!!!");
+    }
+
+    const userTweets = await Tweet.aggregate(
+        [
+            {
+                $match : {
+                    owner : new mongoose.Types.ObjectId(userId),
+                }
+            },
+            {
+                $project : {
+                    _id : 0,
+                    content : 1
+                }
+            }
+        ]
+    );
+
+    if(!userTweets){
+        throw new apiError(500, "Something went wrong while fetching the user tweets!!!");
+    }
+
+    console.log(userTweets);
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            userTweets,
+            "User tweets fetched successfully!!!",
+        )
+    )
+})
+
 export {
     createTweet,
     updateTweet,
     deleteTweet,
+    getUserTweets
 }
