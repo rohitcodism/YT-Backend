@@ -8,75 +8,69 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 const toggleLikeVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params;
+    const {videoId} = req.params;
 
-    if (!videoId) {
+    const userId = req.user?._id;
+
+    if(!videoId){
         throw new apiError(400, "Expected a video id!!!");
     }
 
-    const video = await Video.findById(videoId);
+    const existingVideo = await Video.findById(videoId)
 
-    if (!video) {
-        throw new apiError("Invalid video!!!");
+    if(!existingVideo){
+        throw new apiError(400, "Invalid video id!!!");
     }
 
-    const existingUser = req.user;
+    const isLiked = existingVideo.likes?.includes(userId);
 
-    const isLiked = existingUser.likedVideos?.includes(videoId);
-
-    console.log(" liked : ",isLiked);
-
-    if(isLiked){
-        const user = await User.findByIdAndUpdate(
-            existingUser?._id,
-            {
-                $pull: {
-                    likedVideos: videoId
-                }
-            }
-        )
-
-        console.log(user)
-
-        if (!user) {
-            throw new apiError(500, "Something went wrong while updating the liked status of the video!!!");
-        }
-    
-        res
-            .status(200)
-            .json(
-                new apiResponse(
-                    200,
-                    user,
-                    "Video like status toggled successfully."
-                )
-            )
-    }
-    else{
-        const user = await User.findByIdAndUpdate(
-            existingUser?._id,
+    if(!isLiked){
+        const updatedVideo = await Video.findByIdAndUpdate(
+            videoId,
             {
                 $push: {
-                    likedVideos: videoId,
+                    likes: userId,
                 }
             }
         )
 
-        console.log(user)
-
-        if (!user) {
-            throw new apiError(500, "Something went wrong while updating the liked status of the video!!!");
+        if(!updatedVideo){
+            throw new apiError(500, "Cannot toggle the tweet like!!!");
         }
-    
+
         res
-            .status(200)
-            .json(
-                new apiResponse(
-                    200,
-                    user,
-                    "Video like status toggled successfully."
-                )
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                updatedVideo,
+                "Like toggled successfully!!!",
             )
+        )
+    }
+    else{
+        const updatedVideo = await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $pull: {
+                    likes: userId,
+                }
+            }
+        )
+
+        if(!updatedVideo){
+            throw new apiError(500, "Cannot toggle the tweet like!!!");
+        }
+
+        res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                updatedVideo,
+                "Like toggled successfully!!!",
+            )
+        )
     }
 
 });

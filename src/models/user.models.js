@@ -50,12 +50,6 @@ const userSchema = new mongoose.Schema(
                 ref: "Video",
             }
         ],
-        likedVideos: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Video",
-            }
-        ],
         refreshToken:
         {
             type: String,
