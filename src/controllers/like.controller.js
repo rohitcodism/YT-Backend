@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import { Tweet } from "../models/tweet.models.js";
 import { User } from "../models/user.models.js"
 import { Video } from "../models/video.models.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Like } from "../models/like.models.js";
 
 
 
@@ -16,63 +18,53 @@ const toggleLikeVideo = asyncHandler(async (req, res) => {
         throw new apiError(400, "Expected a video id!!!");
     }
 
-    const existingVideo = await Video.findById(videoId)
+    const video = await Video.findById(videoId);
 
-    if(!existingVideo){
-        throw new apiError(400, "Invalid video id!!!");
+    if(!video){
+        throw new apiError(400, "Invalid video to like!!!");
     }
 
-    const isLiked = existingVideo.likes?.includes(userId);
+    const existingLike = await Like.findOne({
+        owner : userId,
+        video : videoId,
+    })
 
-    if(!isLiked){
-        const updatedVideo = await Video.findByIdAndUpdate(
-            videoId,
-            {
-                $push: {
-                    likes: userId,
-                }
-            }
-        )
+    if(existingLike){
 
-        if(!updatedVideo){
-            throw new apiError(500, "Cannot toggle the tweet like!!!");
-        }
+        console.log("Existing like : ",existingLike);
+
+        await Like.findByIdAndDelete(existingLike?._id);
 
         res
         .status(200)
         .json(
             new apiResponse(
                 200,
-                updatedVideo,
-                "Like toggled successfully!!!",
+                null,
+                "Video like toggled successfully."
             )
         )
     }
     else{
-        const updatedVideo = await Video.findByIdAndUpdate(
-            videoId,
+        const newLike = await Like.create(
             {
-                $pull: {
-                    likes: userId,
-                }
+                owner : userId,
+                video : videoId,
             }
         )
 
-        if(!updatedVideo){
-            throw new apiError(500, "Cannot toggle the tweet like!!!");
-        }
+        console.log("New Like : ",newLike);
 
         res
         .status(200)
         .json(
             new apiResponse(
                 200,
-                updatedVideo,
-                "Like toggled successfully!!!",
+                newLike,
+                "Video like toggled successfully."
             )
         )
     }
-
 });
 
 const toggleTweetLike = asyncHandler(async(req,res) => {
@@ -84,66 +76,87 @@ const toggleTweetLike = asyncHandler(async(req,res) => {
         throw new apiError(400, "Expected a tweet id!!!");
     }
 
-    const existingTweet = await Tweet.findById(tweetId)
+    const tweet = await Tweet.findById(tweetId);
 
-    if(!existingTweet){
-        throw new apiError(400, "Invalid tweet id!!!");
+    if(!tweet){
+        throw new apiError(400, "Invalid tweet to be liked!!!");
     }
 
-    const isLiked = existingTweet.likes?.includes(userId);
+    const existingLike = await Like.findOne({
+        owner : userId,
+        tweet : tweetId,
+    })
 
-    if(!isLiked){
-        const updatedTweet = await Tweet.findByIdAndUpdate(
-            tweetId,
-            {
-                $push: {
-                    likes: userId,
-                }
-            }
-        )
+    if(existingLike){
 
-        if(!updatedTweet){
-            throw new apiError(500, "Cannot toggle the tweet like!!!");
-        }
+        console.log("Existing like : ",existingLike);
+
+        await Like.findByIdAndDelete(existingLike?._id);
 
         res
         .status(200)
         .json(
             new apiResponse(
                 200,
-                updatedTweet,
-                "Like toggled successfully!!!",
+                null,
+                "Tweet like toggled successfully."
             )
         )
     }
     else{
-        const updatedTweet = await Tweet.findByIdAndUpdate(
-            tweetId,
+        const newLike = await Like.create(
             {
-                $pull: {
-                    likes: userId,
-                }
+                owner : userId,
+                tweet : tweetId,
             }
         )
 
-        if(!updatedTweet){
-            throw new apiError(500, "Cannot toggle the tweet like!!!");
-        }
+        console.log("New Like : ",newLike);
 
         res
         .status(200)
         .json(
             new apiResponse(
                 200,
-                updatedTweet,
-                "Like toggled successfully!!!",
+                newLike,
+                "Tweet like toggled successfully."
             )
         )
     }
-})
+});
+
+const getLikedVideos = asyncHandler(async(req,res) => {
+    const userId = req.user?._id;
+
+    if(!userId){
+        throw new apiError(400, "Unauthorized request!!!");
+    }
+
+    const userLikedVideos = await Like.aggregate(
+        [
+            {
+                $match : {
+                    owner : userId,
+                    video : {$ne : null}
+                }
+            },
+            {
+                $lookup : {
+                    from : "videos",
+                    localField : "video",
+                    foreignField : "_id",
+                    as : "videoName",
+                }
+            },
+        ]
+    )
+
+    console.log(userLikedVideos);
+});
 
 
 export {
     toggleLikeVideo,
-    toggleTweetLike
+    toggleTweetLike,
+    getLikedVideos
 }
