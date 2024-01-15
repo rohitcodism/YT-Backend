@@ -19,68 +19,28 @@ const toggleLikeVideo = asyncHandler(async (req, res) => {
         throw new apiError("Invalid video!!!");
     }
 
-    let user;
+    const existingUser = req.user;
 
-    try {
-        const isFieldExists = await User.findOne({ _id: req.user?._id, likedVideos: { $exists: true } })
+    const isLiked = existingUser.likedVideos?.includes(videoId);
 
-        console.log(isFieldExists);
+    console.log(" liked : ",isLiked);
 
-        if (isFieldExists) {
-            console.log("entered-main-if")
-            const isLiked = await User.exists({ _id: req.user?._id, likedVideos: videoId });
-
-            if (!isLiked) {
-                console.log("entered-sub-if")
-                user = await User.findByIdAndUpdate(
-                    req.user?._id,
-                    {
-                        $push: {
-                            likedVideos: videoId,
-                        }
-                    },
-                    {
-                        new: true,
-                    }
-                );
-            }
-            else {
-                console.log("entered-sub-else")
-                user = await User.findByIdAndUpdate(
-                    req.user?._id,
-                    {
-                        $pull: {
-                            likedVideos: videoId,
-                        }
-                    },
-                    {
-                        new: true,
-                    }
-                );
-            }
-        } else {
-            console.log("Entered else");
-            user = await User.findByIdAndUpdate(
-                req.user?._id,
-                {
-                    $addToSet : {
-                        likedVideos : [
-                            videoId,
-                        ]
-                    }
-                },
-                {
-                    new: true,
+    if(isLiked){
+        const user = await User.findByIdAndUpdate(
+            existingUser?._id,
+            {
+                $pull: {
+                    likedVideos: videoId
                 }
-            );
-        }
+            }
+        )
 
         console.log(user)
 
         if (!user) {
             throw new apiError(500, "Something went wrong while updating the liked status of the video!!!");
         }
-
+    
         res
             .status(200)
             .json(
@@ -90,11 +50,33 @@ const toggleLikeVideo = asyncHandler(async (req, res) => {
                     "Video like status toggled successfully."
                 )
             )
-    } catch (error) {
-        console.error("Error : ",error);
-        console.log("Something went wrong!!!");
     }
+    else{
+        const user = await User.findByIdAndUpdate(
+            existingUser?._id,
+            {
+                $push: {
+                    likedVideos: videoId,
+                }
+            }
+        )
 
+        console.log(user)
+
+        if (!user) {
+            throw new apiError(500, "Something went wrong while updating the liked status of the video!!!");
+        }
+    
+        res
+            .status(200)
+            .json(
+                new apiResponse(
+                    200,
+                    user,
+                    "Video like status toggled successfully."
+                )
+            )
+    }
 
 });
 
