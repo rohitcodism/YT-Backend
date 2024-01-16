@@ -9,7 +9,9 @@ import mongoose, { get } from "mongoose";
 const getPaginatedData = async(page, limit, owner) => {
     try {
         const skip = (page-1)*limit // to count the number of documents to skip.
-        const totalCount = await Video.countDocuments() // to count the total number of documents.
+
+        // TODO : Needs to be tested one more time
+        const totalCount = await Video.countDocuments({owner : owner}) // to count the total number of documents.
     
         const videos = await Video.find({owner : owner})
             .skip(skip)

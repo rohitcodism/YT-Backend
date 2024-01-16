@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Tweet } from "../models/tweet.models.js";
 import { User } from "../models/user.models.js"
 import { Video } from "../models/video.models.js";
@@ -138,14 +137,6 @@ const getLikedVideos = asyncHandler(async(req,res) => {
                 $match : {
                     owner : userId,
                     video : {$ne : null}
-                }
-            },
-            {
-                $lookup : {
-                    from : "videos",
-                    localField : "video",
-                    foreignField : "_id",
-                    as : "videoName",
                 }
             },
         ]
