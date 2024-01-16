@@ -10,6 +10,10 @@ const commentSchema = new mongoose.Schema(
             type : mongoose.Schema.Types.ObjectId,
             ref : "Video",
         },
+        tweet : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Tweet",
+        },
         owner : {
             type : mongoose.Schema.Types.ObjectId,
             ref : "User",
