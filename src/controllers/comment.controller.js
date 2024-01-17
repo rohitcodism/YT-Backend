@@ -213,10 +213,48 @@ const addTweetComment = asyncHandler(async(req,res) => {
     )
 });
 
+const updateComments = asyncHandler(async(req,res) => {
+    const {commentId} = req.params;
+    const {newContent} = req.body;
+
+    if(!id){
+        throw new apiError(400, "Expected a video or twitter id!!!");
+    }
+
+    if(!newContent){
+        throw new apiError(400, "These fields cannot be blank!!!");
+    }
+
+    const updatedComment = await Comment.findByIdAndUpdate(
+        commentId,
+        {
+            content : newContent,
+        },
+        {
+            new : true,
+        }
+    );
+
+    if(!updatedComment){
+        throw new apiError(500, "Something went wrong while updating the comment in the video.")
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            500,
+            updatedComment,
+            "Comment updated successfully!!!",
+        )
+    )
+})
+
 
 export {
     getVideoComments,
     addVideoComment,
     addTweetComment,
     getTweetComments,
+    updateComments
 }
