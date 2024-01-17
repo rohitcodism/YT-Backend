@@ -213,7 +213,7 @@ const addTweetComment = asyncHandler(async(req,res) => {
     )
 });
 
-const updateComments = asyncHandler(async(req,res) => {
+const updateComment = asyncHandler(async(req,res) => {
     const {commentId} = req.params;
     const {newContent} = req.body;
 
@@ -248,7 +248,33 @@ const updateComments = asyncHandler(async(req,res) => {
             "Comment updated successfully!!!",
         )
     )
-})
+});
+
+const deleteComment = asyncHandler(async(req,res) => {
+    const {commentId} = req.params;
+
+    if(!commentId){
+        throw new apiError(400, "Expected a comment id!!!");
+    }
+
+    try {
+        await Comment.findByIdAndDelete(commentId);
+
+        res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                null,
+                "Comment deleted successfully.",
+            )
+        )
+    } catch (error) {
+        console.log("Something went wrong while deleting the comment!!!");
+        console.error(error);
+        throw new apiError(500, "Something went wrong while deleting the comment!!!")
+    }
+});
 
 
 export {
@@ -256,5 +282,6 @@ export {
     addVideoComment,
     addTweetComment,
     getTweetComments,
-    updateComments
+    updateComment,
+    deleteComment
 }
