@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Comment } from "../models/comment.models.js";
 import { Tweet } from "../models/tweet.models.js";
 import { Video } from "../models/video.models.js";
@@ -217,7 +218,7 @@ const updateComment = asyncHandler(async(req,res) => {
     const {commentId} = req.params;
     const {newContent} = req.body;
 
-    if(!id){
+    if(!commentId){
         throw new apiError(400, "Expected a video or twitter id!!!");
     }
 
