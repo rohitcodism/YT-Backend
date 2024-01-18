@@ -16,21 +16,14 @@ const toggleSubscription = asyncHandler(async(req,res) => {
     const isSubscribed = await Subscription.findOne({channel : channelId, subscriber : userId})
 
     if(!isSubscribed){
-        const updatedSubscription = await Subscription.findOneAndUpdate(
+        const createdSubscription = await Subscription.create(
             {
+                subscriber : userId,
                 channel :channelId,
             },
-            {
-                $pull : {
-                    subscriber : userId,
-                }
-            },
-            {
-                new : true,
-            }
         )
 
-        if(!updatedSubscription){
+        if(!createdSubscription){
             throw new apiError(500, "Something went wrong while toggling the subscription!!!");
         }
 
@@ -39,39 +32,35 @@ const toggleSubscription = asyncHandler(async(req,res) => {
         .json(
             new apiResponse(
                 200,
-                updatedSubscription,
+                createdSubscription,
                 "Subscription toggled successfully!!!",
             )
         )
     }
     else
     {
-        const updatedSubscription = await Subscription.findOneAndUpdate(
-            {
-                channel :channelId,
-            },
-            {
-                $push : {
-                    subscriber : userId,
-                }
-            },
-            {
-                new : true,
-            }
-        )
+        try {
+            await Subscription.findByIdAndDelete(isSubscribed?._id);
+            console.log("Subscription deleted successfully.");
 
-        if(!updatedSubscription){
-            throw new apiError(500, "Something went wrong while toggling the subscription!!!");
-        }
-
-        res
-        .status(200)
-        .json(
-            new apiResponse(
-                200,
-                updatedSubscription,
-                "Subscription toggled successfully!!!",
+            res
+            .status(200)
+            .json(
+                new apiResponse(
+                    200,
+                    null,
+                    "Subscription deleted successfully!!!",
+                )
             )
-        )
+
+        } catch (error) {
+            console.error(error);
+            throw new apiError(500, "Something went wrong while creating the subscription!!!");
+        }
     }
 });
+
+
+export {
+    toggleSubscription,
+}
