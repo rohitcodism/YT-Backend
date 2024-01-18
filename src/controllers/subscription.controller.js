@@ -76,7 +76,10 @@ const getUserChannelSubscribers = asyncHandler(async(req,res) => {
                 }
             },
             {
-                $count : "Number of Subscribers : "
+                $project : {
+                    subscriber : 1,
+                    _id : 0,
+                }
             }
         ]
     )
@@ -96,10 +99,51 @@ const getUserChannelSubscribers = asyncHandler(async(req,res) => {
             "Subscribers count fetched successfully!!!",
         )
     )
-})
+});
+
+const getSubscribedChannel = asyncHandler(async(req,res) => {
+    const {subscriberId} = req.params;
+
+    if(!subscriberId){
+        throw new apiError(400, "Expected a subscriber id!!!");
+    }
+
+    const subscribedChannels = await Subscription.aggregate(
+        [
+            {
+                $match : {
+                    subscriber : new mongoose.Types.ObjectId(subscriberId),
+                }
+            },
+            {
+                $project : {
+                    subscriber : 1,
+                    _id : 0,
+                }
+            }
+        ]
+    )
+
+    console.log(subscribedChannels);
+
+    if(!subscribedChannels || !subscribedChannels.length){
+        throw new apiError(500, "Something went wrong while fetching the subscribed channels!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            subscribedChannels[0],
+            "Subscribed channels fetched successfully!!!",
+        )
+    )
+});
 
 
 export {
     toggleSubscription,
-    getUserChannelSubscribers
+    getUserChannelSubscribers,
+    getSubscribedChannel,
 }
