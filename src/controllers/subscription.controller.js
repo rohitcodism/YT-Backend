@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { Subscription } from "../models/subscription.models.js";
+import mongoose from "mongoose";
 
 
 const toggleSubscription = asyncHandler(async(req,res) => {
@@ -60,7 +61,45 @@ const toggleSubscription = asyncHandler(async(req,res) => {
     }
 });
 
+const getUserChannelSubscribers = asyncHandler(async(req,res) => {
+    const {channelId} = req.params;
+
+    if(!channelId){
+        throw new apiError(400, "Expected a channel id!!!");
+    }
+
+    const channelSubscribers = await Subscription.aggregate(
+        [
+            {
+                $match : {
+                    channel : new mongoose.Types.ObjectId(channelId),
+                }
+            },
+            {
+                $count : "Number of Subscribers : "
+            }
+        ]
+    )
+
+    console.log(channelSubscribers[0]);
+
+    if(!channelSubscribers || !channelSubscribers?.length){
+        throw new apiError(500, "Something went wrong while fetching the subscriber count!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            channelSubscribers[0],
+            "Subscribers count fetched successfully!!!",
+        )
+    )
+})
+
 
 export {
     toggleSubscription,
+    getUserChannelSubscribers
 }
