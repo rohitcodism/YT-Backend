@@ -29,6 +29,7 @@ import tweetsRouter from "./routes/tweet.routes.js";
 import likeRouter from "./routes/like.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter); // --> https://localhost:3000/api/v1/users/register
@@ -44,5 +45,7 @@ app.use("/api/v1/like",likeRouter) // --> https://localhost:3000/api/v1/like
 app.use("/api/v1/comment",commentRouter) // https://localhost:3000/api/v1/comment
 
 app.use("/api/v1/subscription",subscriptionRouter) // https://localhost:3000/api/v1/subscription
+
+app.use("api/v1/dashboard",dashboardRouter) // https://localhost:3000/api/v1/dashboard
 
 export { app };
