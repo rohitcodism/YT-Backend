@@ -46,6 +46,6 @@ app.use("/api/v1/comment",commentRouter) // https://localhost:3000/api/v1/commen
 
 app.use("/api/v1/subscription",subscriptionRouter) // https://localhost:3000/api/v1/subscription
 
-app.use("api/v1/dashboard",dashboardRouter) // https://localhost:3000/api/v1/dashboard
+app.use("/api/v1/dashboard",dashboardRouter) // https://localhost:3000/api/v1/dashboard
 
 export { app };

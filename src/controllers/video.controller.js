@@ -441,7 +441,38 @@ const togglePublishStatus = asyncHandler(async(req,res) => {
             "Publish status toggled successfully!!!"
         )
     )
-})
+});
+
+const incrementViews = asyncHandler(async(req,res) => {
+    const {videoId} = req.params;
+
+    if(!videoId){
+        throw new apiError(400, "Expected a video id!!!");
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $inc : {
+                views : 1,
+            }
+        }
+    );
+
+    if(!updatedVideo){
+        throw new apiError(500, "Something went wrong while incrementing the views in the video!!!");
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            updatedVideo?.views,
+            "Views incremented successfully."
+        )
+    )
+});
 
 export {
     uploadVideo,
@@ -451,5 +482,6 @@ export {
     updateVideoDetails, 
     getVideoById,
     togglePublishStatus,
-    getAllVideos
+    getAllVideos,
+    incrementViews,
 };
