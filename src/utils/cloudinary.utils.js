@@ -3,9 +3,9 @@ import fs from "fs";
 import { apiError } from './apiError.js';
 
 cloudinary.config({
-    cloud_name: 'dhiytc6vf',
-    api_key: '767695252931981', 
-    api_secret: 'XanIo5SeI60BQ_DAJEO81tOPceA',
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const uploadOnCloudinary = async (localFilePath) => {
